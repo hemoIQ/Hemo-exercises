@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Plus, Trash2, ArrowLeft, Image as ImageIcon, Dumbbell, Calendar, LayoutGrid, HardDrive, Settings, AlertTriangle, Check, Palette, Search, Activity, List, Edit3, PlayCircle, Upload, Film, X, RefreshCw, Github, CheckCircle2 } from 'lucide-react';
 
 // --- إعدادات التحديث (يجب تعديلها لتناسب مستودعك) ---
-const APP_VERSION = '1.0.0'; // الإصدار الحالي للتطبيق
+const APP_VERSION = '1.2.1'; // الإصدار الحالي للتطبيق
 const GITHUB_CONFIG = {
   USERNAME: 'hemoIQ', // ضع اسم المستخدم الخاص بك في جيت هوب هنا
   REPO: 'Hemo-exercises',    // ضع اسم المستودع هنا
