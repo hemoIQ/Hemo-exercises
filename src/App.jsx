@@ -240,6 +240,7 @@ export default function App() {
 
   // States for updates
   const [updateAvailable, setUpdateAvailable] = useState(null);
+  const [updateUrl, setUpdateUrl] = useState(null); // URL for direct download
   const [isCheckingUpdate, setIsCheckingUpdate] = useState(false);
   const [lastCheckMessage, setLastCheckMessage] = useState('');
 
@@ -295,18 +296,25 @@ export default function App() {
     setLastCheckMessage('');
 
     try {
-      // جلب ملف package.json مع إضافة timestamp لمنع الكاش
-      const response = await fetch(`https://raw.githubusercontent.com/${GITHUB_CONFIG.USERNAME}/${GITHUB_CONFIG.REPO}/${GITHUB_CONFIG.BRANCH}/package.json?t=${Date.now()}`);
+      // Use GitHub Releases API to get the latest release and assets
+      const response = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.USERNAME}/${GITHUB_CONFIG.REPO}/releases/latest`);
 
       if (response.ok) {
-        const pkg = await response.json();
-        const latestVersion = pkg.version;
-        // مقارنة بسيطة للإصدارات
+        const releaseData = await response.json();
+        const latestVersion = releaseData.tag_name.replace(/^v/, ''); // Remove 'v' prefix
+
+        // Find the APK asset
+        const apkAsset = releaseData.assets.find(asset => asset.name.endsWith('.apk'));
+        // Use direct link if available, otherwise fallback to release page
+        const downloadLink = apkAsset ? apkAsset.browser_download_url : releaseData.html_url;
+
         if (latestVersion !== APP_VERSION) {
           setUpdateAvailable(latestVersion);
+          setUpdateUrl(downloadLink);
           if (manual) setLastCheckMessage(`تحديث جديد متوفر: v${latestVersion}`);
         } else {
           setUpdateAvailable(null);
+          setUpdateUrl(null);
           if (manual) setLastCheckMessage('You are using the latest version');
         }
       } else {
@@ -414,7 +422,7 @@ export default function App() {
             </div>
           </div>
           <a
-            href={`https://github.com/${GITHUB_CONFIG.USERNAME}/${GITHUB_CONFIG.REPO}`}
+            href={updateUrl || `https://github.com/${GITHUB_CONFIG.USERNAME}/${GITHUB_CONFIG.REPO}/releases/latest`}
             target="_blank"
             rel="noopener noreferrer"
             className="bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95 flex items-center gap-1 border border-white/20"
@@ -622,7 +630,7 @@ export default function App() {
                   )}
                   <span className="text-zinc-300">{lastCheckMessage}</span>
                   {updateAvailable && (
-                    <a href={`https://github.com/${GITHUB_CONFIG.USERNAME}/${GITHUB_CONFIG.REPO}`} target="_blank" className="mr-auto text-blue-400 hover:underline font-bold">تنزيل</a>
+                    <a href={updateUrl || `https://github.com/${GITHUB_CONFIG.USERNAME}/${GITHUB_CONFIG.REPO}/releases/latest`} target="_blank" className="mr-auto text-blue-400 hover:underline font-bold">تنزيل</a>
                   )}
                 </div>
               )}
