@@ -611,10 +611,10 @@ export default function App() {
                 <button
                   onClick={() => checkForUpdates(true)}
                   disabled={isCheckingUpdate}
-                  className="bg-white/10 hover:bg-white/20 active:scale-95 transition-all text-white px-3 py-2 rounded-xl flex items-center gap-2 text-xs font-bold disabled:opacity-50 border border-white/5"
+                  className="bg-zinc-800 hover:bg-zinc-700 active:scale-95 transition-all text-white px-4 py-2 rounded-xl flex items-center gap-2 text-xs font-bold disabled:opacity-50 border border-white/5"
                 >
                   <RefreshCw className={`w-3 h-3 ${isCheckingUpdate ? 'animate-spin' : ''}`} />
-                  {isCheckingUpdate ? 'Checking...' : 'Check for Updates'}
+                  {isCheckingUpdate ? 'Checking...' : 'Check for Update'}
                 </button>
               </div>
 
