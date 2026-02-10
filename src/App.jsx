@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Plus, Trash2, ArrowLeft, Image as ImageIcon, Dumbbell, Calendar, LayoutGrid, HardDrive, Settings, AlertTriangle, Check, Palette, Search, Activity, List, Edit3, PlayCircle, Upload, Film, X } from 'lucide-react';
+import UpdateNotification from './components/UpdateNotification';
 import "./App.css";
 
 // --- إعدادات قاعدة البيانات (IndexedDB) لحفظ الفيديوهات والصور الكبيرة ---
