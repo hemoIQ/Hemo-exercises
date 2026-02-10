@@ -1,7 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, Trash2, ArrowLeft, Image as ImageIcon, Dumbbell, Calendar, LayoutGrid, HardDrive, Settings, AlertTriangle, Check, Palette, Search, Activity, List, Edit3, PlayCircle, Upload, Film, X } from 'lucide-react';
-import UpdateNotification from './components/UpdateNotification';
-import "./App.css";
+import { Plus, Trash2, ArrowLeft, Image as ImageIcon, Dumbbell, Calendar, LayoutGrid, HardDrive, Settings, AlertTriangle, Check, Palette, Search, Activity, List, Edit3, PlayCircle, Upload, Film, X, RefreshCw, Github, CheckCircle2 } from 'lucide-react';
+
+// --- إعدادات التحديث (يجب تعديلها لتناسب مستودعك) ---
+const APP_VERSION = '1.0.0'; // الإصدار الحالي للتطبيق
+const GITHUB_CONFIG = {
+  USERNAME: 'hemoIQ', // ضع اسم المستخدم الخاص بك في جيت هوب هنا
+  REPO: 'Hemo-exercises',    // ضع اسم المستودع هنا
+  BRANCH: 'main'             // الفرع الرئيسي
+};
 
 // --- إعدادات قاعدة البيانات (IndexedDB) لحفظ الفيديوهات والصور الكبيرة ---
 const DB_NAME = 'GymTrackerDB';
@@ -114,8 +120,8 @@ const MediaThumbnail = ({ mediaId, legacyImage, alt, className }) => {
   }, [mediaId, legacyImage]);
 
   if (loading) return (
-    <div className={`animate-pulse bg-zinc-800 flex items-center justify-center ${className}`}>
-      <Activity className="w-6 h-6 text-zinc-600 animate-spin" />
+    <div className={`animate-pulse bg-white/5 flex items-center justify-center ${className}`}>
+      <Activity className="w-6 h-6 text-white/20 animate-spin" />
     </div>
   );
 
@@ -140,7 +146,7 @@ const MediaThumbnail = ({ mediaId, legacyImage, alt, className }) => {
   }
 
   return (
-    <div className={`${className} flex flex-col items-center justify-center bg-zinc-800/50 opacity-50`}>
+    <div className={`${className} flex flex-col items-center justify-center bg-white/5 opacity-50`}>
       <Dumbbell className="w-8 h-8 mb-2 opacity-50" />
     </div>
   );
@@ -148,16 +154,72 @@ const MediaThumbnail = ({ mediaId, legacyImage, alt, className }) => {
 
 // --- التطبيق الرئيسي ---
 
+// تم تحديث الثيمات لتكون زجاجية (شفافية + تمويه)
 const THEMES = {
-  classic: { id: 'classic', name: 'البرتقالي الكلاسيكي', bg: 'bg-[#09090b]', surface: 'bg-zinc-900', accent: 'text-orange-500', accentBg: 'bg-orange-600', accentHover: 'hover:bg-orange-500', accentLight: 'bg-orange-500/10', border: 'border-white/5', gradient: 'from-orange-400 to-orange-600' },
-  ocean: { id: 'ocean', name: 'أزرق المحيط', bg: 'bg-[#020617]', surface: 'bg-slate-900', accent: 'text-cyan-400', accentBg: 'bg-cyan-600', accentHover: 'hover:bg-cyan-500', accentLight: 'bg-cyan-500/10', border: 'border-cyan-500/10', gradient: 'from-cyan-400 to-blue-600' },
-  emerald: { id: 'emerald', name: 'الأخضر الزمردي', bg: 'bg-[#022c22]', surface: 'bg-[#064e3b]', accent: 'text-emerald-400', accentBg: 'bg-emerald-600', accentHover: 'hover:bg-emerald-500', accentLight: 'bg-emerald-500/10', border: 'border-emerald-500/10', gradient: 'from-emerald-400 to-green-600' },
-  royal: { id: 'royal', name: 'البنفسجي الملكي', bg: 'bg-[#0f0728]', surface: 'bg-[#1e1045]', accent: 'text-purple-400', accentBg: 'bg-purple-600', accentHover: 'hover:bg-purple-500', accentLight: 'bg-purple-500/10', border: 'border-purple-500/10', gradient: 'from-purple-400 to-indigo-600' },
-  lava: { id: 'lava', name: 'الحمم الحمراء', bg: 'bg-[#0c0000]', surface: 'bg-[#210000]', accent: 'text-red-500', accentBg: 'bg-red-600', accentHover: 'hover:bg-red-500', accentLight: 'bg-red-500/10', border: 'border-red-500/10', gradient: 'from-red-400 to-red-700' }
+  classic: {
+    id: 'classic',
+    name: 'البرتقالي الكلاسيكي',
+    bg: 'bg-[#09090b]',
+    surface: 'bg-zinc-900/60 backdrop-blur-xl', // زجاجي
+    accent: 'text-orange-500',
+    accentBg: 'bg-orange-600',
+    accentHover: 'hover:bg-orange-500',
+    accentLight: 'bg-orange-500/10',
+    border: 'border-white/10',
+    gradient: 'from-orange-400 to-orange-600'
+  },
+  ocean: {
+    id: 'ocean',
+    name: 'أزرق المحيط',
+    bg: 'bg-[#020617]',
+    surface: 'bg-slate-900/60 backdrop-blur-xl', // زجاجي
+    accent: 'text-cyan-400',
+    accentBg: 'bg-cyan-600',
+    accentHover: 'hover:bg-cyan-500',
+    accentLight: 'bg-cyan-500/10',
+    border: 'border-cyan-500/10',
+    gradient: 'from-cyan-400 to-blue-600'
+  },
+  emerald: {
+    id: 'emerald',
+    name: 'الأخضر الزمردي',
+    bg: 'bg-[#022c22]',
+    surface: 'bg-[#064e3b]/60 backdrop-blur-xl', // زجاجي
+    accent: 'text-emerald-400',
+    accentBg: 'bg-emerald-600',
+    accentHover: 'hover:bg-emerald-500',
+    accentLight: 'bg-emerald-500/10',
+    border: 'border-emerald-500/10',
+    gradient: 'from-emerald-400 to-green-600'
+  },
+  royal: {
+    id: 'royal',
+    name: 'البنفسجي الملكي',
+    bg: 'bg-[#0f0728]',
+    surface: 'bg-[#1e1045]/60 backdrop-blur-xl', // زجاجي
+    accent: 'text-purple-400',
+    accentBg: 'bg-purple-600',
+    accentHover: 'hover:bg-purple-500',
+    accentLight: 'bg-purple-500/10',
+    border: 'border-purple-500/10',
+    gradient: 'from-purple-400 to-indigo-600'
+  },
+  lava: {
+    id: 'lava',
+    name: 'الحمم الحمراء',
+    bg: 'bg-[#0c0000]',
+    surface: 'bg-[#210000]/60 backdrop-blur-xl', // زجاجي
+    accent: 'text-red-500',
+    accentBg: 'bg-red-600',
+    accentHover: 'hover:bg-red-500',
+    accentLight: 'bg-red-500/10',
+    border: 'border-red-500/10',
+    gradient: 'from-red-400 to-red-700'
+  }
 };
 
 const AppLogo = ({ theme }) => (
-  <div className="relative flex items-center justify-center w-10 h-10">
+  <div className="relative flex items-center justify-center w-10 h-10 transition-transform duration-500 hover:scale-110">
     <div className={`absolute inset-0 ${theme.accentLight} blur-lg rounded-full animate-pulse`}></div>
     <svg viewBox="0 0 24 24" className={`w-8 h-8 ${theme.accent} relative z-10`} fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="M6 15h12M6 9h12M18 6v12M6 6v12M3 12h3M18 12h3" />
@@ -175,6 +237,11 @@ export default function App() {
   const [viewMedia, setViewMedia] = useState(null);
   const [currentTheme, setCurrentTheme] = useState(THEMES.classic);
   const [deleteConfirm, setDeleteConfirm] = useState({ isOpen: false, type: null, id: null, title: '' });
+
+  // States for updates
+  const [updateAvailable, setUpdateAvailable] = useState(null);
+  const [isCheckingUpdate, setIsCheckingUpdate] = useState(false);
+  const [lastCheckMessage, setLastCheckMessage] = useState('');
 
   const [newDayTitle, setNewDayTitle] = useState('');
   const [newExerciseName, setNewExerciseName] = useState('');
@@ -194,6 +261,9 @@ export default function App() {
     if (savedTheme && THEMES[savedTheme]) setCurrentTheme(THEMES[savedTheme]);
 
     initDB().catch(console.error);
+
+    // فحص التحديثات تلقائياً عند بدء التشغيل
+    checkForUpdates();
   }, []);
 
   useEffect(() => {
@@ -214,6 +284,41 @@ export default function App() {
       if (fileInputRef.current) fileInputRef.current.value = ''; // Reset input
     }
   }, [isAddingExercise]);
+
+  const checkForUpdates = async (manual = false) => {
+    if (GITHUB_CONFIG.USERNAME === 'YOUR_USERNAME') {
+      if (manual) setLastCheckMessage('يرجى ضبط إعدادات GitHub في الكود');
+      return;
+    }
+
+    setIsCheckingUpdate(true);
+    setLastCheckMessage('');
+
+    try {
+      // جلب ملف package.json مع إضافة timestamp لمنع الكاش
+      const response = await fetch(`https://raw.githubusercontent.com/${GITHUB_CONFIG.USERNAME}/${GITHUB_CONFIG.REPO}/${GITHUB_CONFIG.BRANCH}/package.json?t=${Date.now()}`);
+
+      if (response.ok) {
+        const pkg = await response.json();
+        const latestVersion = pkg.version;
+        // مقارنة بسيطة للإصدارات
+        if (latestVersion !== APP_VERSION) {
+          setUpdateAvailable(latestVersion);
+          if (manual) setLastCheckMessage(`تحديث جديد متوفر: v${latestVersion}`);
+        } else {
+          setUpdateAvailable(null);
+          if (manual) setLastCheckMessage('You are using the latest version');
+        }
+      } else {
+        if (manual) setLastCheckMessage('فشل الاتصال بالمستودع');
+      }
+    } catch (error) {
+      console.error("Failed to check for updates:", error);
+      if (manual) setLastCheckMessage('حدث خطأ في الاتصال');
+    } finally {
+      setIsCheckingUpdate(false);
+    }
+  };
 
   const changeTheme = (themeKey) => {
     setCurrentTheme(THEMES[themeKey]);
@@ -294,12 +399,37 @@ export default function App() {
   const filteredExercises = exercises.filter(ex => ex.dayId === selectedDay?.id);
 
   return (
-    <div className={`min-h-screen ${currentTheme.bg} text-zinc-100 font-sans pb-10 transition-colors duration-500`} dir="rtl">
+    <div className={`min-h-screen ${currentTheme.bg} text-zinc-100 font-sans pb-10 transition-colors duration-500 bg-[url('https://grainy-gradients.vercel.app/noise.svg')]`} dir="rtl">
+
+      {/* Update Notification Banner */}
+      {updateAvailable && (
+        <div className="bg-gradient-to-r from-blue-600/90 to-indigo-600/90 backdrop-blur-md text-white p-3 px-4 shadow-lg flex items-center justify-between sticky top-0 z-50 animate-in slide-in-from-top duration-500">
+          <div className="flex items-center gap-3">
+            <div className="p-1.5 bg-white/20 rounded-full animate-pulse">
+              <RefreshCw className="w-4 h-4" />
+            </div>
+            <div>
+              <p className="text-sm font-bold">تحديث جديد متوفر!</p>
+              <p className="text-[10px] opacity-90">الإصدار {updateAvailable} متاح الآن</p>
+            </div>
+          </div>
+          <a
+            href={`https://github.com/${GITHUB_CONFIG.USERNAME}/${GITHUB_CONFIG.REPO}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95 flex items-center gap-1 border border-white/20"
+          >
+            <Github className="w-3 h-3" />
+            تحديث
+          </a>
+        </div>
+      )}
+
       {/* Header */}
-      <header className={`${currentTheme.surface}/80 backdrop-blur-xl border-b ${currentTheme.border} p-4 sticky top-0 z-40 shadow-sm`}>
+      <header className={`${currentTheme.surface} border-b ${currentTheme.border} p-4 sticky top-0 z-40 shadow-sm transition-all duration-300 ${updateAvailable ? 'top-[52px]' : 'top-0'}`}>
         <div className="max-w-md mx-auto flex items-center justify-between">
           {selectedDay ? (
-            <button onClick={() => setSelectedDay(null)} className="p-2 hover:bg-white/5 rounded-2xl transition-all active:scale-90">
+            <button onClick={() => setSelectedDay(null)} className="p-2 hover:bg-white/10 rounded-2xl transition-all duration-300 active:scale-90">
               <ArrowLeft className="w-6 h-6" />
             </button>
           ) : (
@@ -312,31 +442,34 @@ export default function App() {
             </h1>
           </div>
 
-          <button onClick={() => setIsSettingsOpen(true)} className="p-2 text-zinc-500 hover:text-white transition-colors">
-            <Palette className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-1">
+            <button onClick={() => setIsSettingsOpen(true)} className="p-2 text-zinc-400 hover:text-white transition-all duration-300 active:scale-90 relative">
+              <Palette className="w-5 h-5" />
+              {updateAvailable && <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>}
+            </button>
+          </div>
         </div>
       </header>
 
       <main className="max-w-md mx-auto p-5 pb-24">
         {!selectedDay ? (
-          <div className="space-y-4 animate-in fade-in duration-300">
+          <div className="space-y-4 animate-in fade-in duration-500">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-white text-xl font-bold">جدولك الأسبوعي</h2>
+                <h2 className="text-white text-xl font-bold drop-shadow-sm">جدولك الأسبوعي</h2>
                 <p className="text-zinc-500 text-xs mt-1">لديك {days.length} أيام مسجلة</p>
               </div>
               <button
                 onClick={() => setIsAddingDay(true)}
-                className={`${currentTheme.accentBg} ${currentTheme.accentHover} text-white w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition-all active:scale-90`}
+                className={`${currentTheme.accentBg} ${currentTheme.accentHover} text-white w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition-all duration-300 active:scale-90 hover:shadow-${currentTheme.accent.split('-')[1]}-500/50 hover:-translate-y-1`}
               >
                 <Plus className="w-6 h-6" />
               </button>
             </div>
 
             {days.length === 0 && !isAddingDay && (
-              <div className={`text-center py-24 ${currentTheme.surface}/30 rounded-[2.5rem] border ${currentTheme.border}`}>
-                <div className={`${currentTheme.surface}/50 rounded-full flex items-center justify-center mx-auto mb-6 w-20 h-20`}>
+              <div className={`text-center py-24 ${currentTheme.surface} rounded-[2.5rem] border ${currentTheme.border} backdrop-blur-sm`}>
+                <div className={`bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6 w-20 h-20`}>
                   <Dumbbell className={`w-10 h-10 text-zinc-600`} />
                 </div>
                 <p className="text-zinc-400 font-medium text-lg">لا يوجد أيام حالياً</p>
@@ -349,14 +482,14 @@ export default function App() {
                 <div
                   key={day.id}
                   onClick={() => setSelectedDay(day)}
-                  className={`relative overflow-hidden ${currentTheme.surface} border ${currentTheme.border} p-6 rounded-[2rem] flex items-center justify-between group cursor-pointer active:scale-[0.98] transition-all shadow-xl shadow-black/20`}
+                  className={`relative overflow-hidden ${currentTheme.surface} border ${currentTheme.border} p-6 rounded-[2rem] flex items-center justify-between group cursor-pointer active:scale-[0.97] transition-all duration-300 hover:border-white/20 hover:shadow-xl hover:-translate-y-1`}
                 >
                   <div className="flex items-center gap-5">
                     <div className={`w-14 h-14 ${currentTheme.accentLight} rounded-[1.2rem] flex items-center justify-center ${currentTheme.accent} group-hover:${currentTheme.accentBg} group-hover:text-white transition-all duration-300`}>
                       <Calendar className="w-7 h-7" />
                     </div>
                     <div>
-                      <h3 className="font-black text-xl text-white group-hover:translate-x-[-4px] transition-transform">{day.title}</h3>
+                      <h3 className="font-black text-xl text-white group-hover:translate-x-[-4px] transition-transform duration-300">{day.title}</h3>
                       <p className="text-zinc-500 text-xs font-bold uppercase tracking-tighter">
                         {exercises.filter(ex => ex.dayId === day.id).length} تمارين محفوظة
                       </p>
@@ -364,7 +497,7 @@ export default function App() {
                   </div>
                   <button
                     onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ isOpen: true, type: 'day', id: day.id, title: day.title }); }}
-                    className="relative z-10 p-3 text-zinc-700 hover:text-red-500 transition-colors active:scale-125"
+                    className="relative z-10 p-3 text-zinc-600 hover:text-red-500 transition-all duration-300 active:scale-110 hover:bg-white/5 rounded-xl"
                   >
                     <Trash2 className="w-5 h-5" />
                   </button>
@@ -373,15 +506,15 @@ export default function App() {
             </div>
           </div>
         ) : (
-          <div className="animate-in fade-in slide-in-from-left duration-300">
+          <div className="animate-in fade-in slide-in-from-left duration-500">
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h2 className="text-white text-xl font-black">التمارين</h2>
+                <h2 className="text-white text-xl font-black drop-shadow-sm">التمارين</h2>
                 <p className="text-zinc-500 text-xs uppercase tracking-widest mt-1">تمارين {selectedDay.title}</p>
               </div>
               <button
                 onClick={() => setIsAddingExercise(true)}
-                className="bg-white text-black px-5 py-2.5 rounded-xl flex items-center gap-2 text-sm font-black shadow-xl transition-all active:scale-95"
+                className="bg-white/90 hover:bg-white text-black px-5 py-2.5 rounded-xl flex items-center gap-2 text-sm font-black shadow-xl shadow-white/5 transition-all duration-300 active:scale-95 hover:-translate-y-0.5 backdrop-blur-sm"
               >
                 <Plus className="w-4 h-4" /> تمرين جديد
               </button>
@@ -392,22 +525,22 @@ export default function App() {
               {filteredExercises.map((ex) => (
                 <div
                   key={ex.id}
-                  className={`${currentTheme.surface} rounded-[1.8rem] overflow-hidden border ${currentTheme.border} relative group shadow-2xl cursor-pointer hover:border-white/10 transition-colors`}
+                  className={`${currentTheme.surface} rounded-[1.8rem] overflow-hidden border ${currentTheme.border} relative group shadow-2xl cursor-pointer hover:border-white/20 transition-all duration-300 active:scale-[0.98] hover:-translate-y-1`}
                   onClick={() => {
                     if (ex.mediaType === 'video' || ex.mediaId || ex.image) {
                       setViewMedia(ex);
                     }
                   }}
                 >
-                  <div className="aspect-video bg-zinc-800/20 flex items-center justify-center overflow-hidden relative">
-                    <MediaThumbnail mediaId={ex.mediaId} legacyImage={ex.image} alt={ex.name} className="w-full h-full" />
+                  <div className="aspect-video bg-black/20 flex items-center justify-center overflow-hidden relative">
+                    <MediaThumbnail mediaId={ex.mediaId} legacyImage={ex.image} alt={ex.name} className="w-full h-full transition-transform duration-700 group-hover:scale-105" />
                   </div>
-                  <div className={`p-4 ${currentTheme.surface}/90 backdrop-blur-sm border-t ${currentTheme.border}`}>
-                    <h4 className="font-bold text-lg text-white truncate text-center">{ex.name}</h4>
+                  <div className={`p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent backdrop-blur-md absolute bottom-0 left-0 right-0 border-t ${currentTheme.border}`}>
+                    <h4 className="font-bold text-lg text-white truncate text-center drop-shadow-md">{ex.name}</h4>
                   </div>
                   <button
                     onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ isOpen: true, type: 'exercise', id: ex.id, title: ex.name }); }}
-                    className="absolute top-3 left-3 p-2 bg-black/40 backdrop-blur-xl rounded-xl text-white opacity-0 group-hover:opacity-100 transition-all border border-white/10 active:scale-125 z-10 hover:bg-red-500/80"
+                    className="absolute top-3 left-3 p-2 bg-black/40 backdrop-blur-xl rounded-xl text-white opacity-0 group-hover:opacity-100 transition-all duration-300 border border-white/10 active:scale-90 hover:bg-red-500/80 z-10"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -415,7 +548,7 @@ export default function App() {
               ))}
 
               {filteredExercises.length === 0 && (
-                <div className="py-20 text-center text-zinc-500 flex flex-col items-center animate-in zoom-in duration-300">
+                <div className="py-20 text-center text-zinc-500 flex flex-col items-center animate-in zoom-in duration-500 delay-100">
                   <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mb-6">
                     <Dumbbell className="w-10 h-10 opacity-40" />
                   </div>
@@ -430,17 +563,17 @@ export default function App() {
 
       {/* Full Screen Media Modal */}
       {viewMedia && (
-        <div className="fixed inset-0 bg-black/95 z-[70] flex flex-col justify-center items-center p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 bg-black/95 z-[70] flex flex-col justify-center items-center p-4 animate-in fade-in duration-300 backdrop-blur-2xl">
           <button
             onClick={() => setViewMedia(null)}
-            className="absolute top-6 left-6 p-3 bg-white/10 rounded-full text-white hover:bg-white/20 z-50 backdrop-blur-md"
+            className="absolute top-6 left-6 p-3 bg-white/10 rounded-full text-white hover:bg-white/20 z-50 backdrop-blur-md transition-all active:scale-90 border border-white/10"
           >
             <X className="w-6 h-6" />
           </button>
 
-          <h2 className="absolute top-8 text-xl font-bold text-white z-40 drop-shadow-md px-4 py-2 bg-black/50 rounded-xl backdrop-blur-sm">{viewMedia.name}</h2>
+          <h2 className="absolute top-8 text-xl font-bold text-white z-40 drop-shadow-lg px-6 py-2 bg-black/40 rounded-2xl backdrop-blur-md border border-white/10">{viewMedia.name}</h2>
 
-          <div className="w-full max-w-5xl aspect-video rounded-3xl overflow-hidden shadow-2xl bg-black border border-white/10 relative">
+          <div className="w-full max-w-5xl aspect-video rounded-[2rem] overflow-hidden shadow-2xl bg-black border border-white/10 relative animate-in zoom-in-95 duration-300">
             <div className="absolute inset-0 flex items-center justify-center bg-black">
               <MediaViewerFull mediaId={viewMedia.mediaId} legacyImage={viewMedia.image} />
             </div>
@@ -450,16 +583,52 @@ export default function App() {
 
       {/* Settings Modal */}
       {isSettingsOpen && (
-        <div className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[60] flex items-center justify-center p-6 animate-in fade-in duration-300">
-          <div className={`${currentTheme.surface} w-full max-w-sm rounded-[2.5rem] p-8 border ${currentTheme.border} shadow-2xl`}>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xl z-[60] flex items-center justify-center p-6 animate-in fade-in duration-300">
+          <div className={`${currentTheme.surface} w-full max-w-sm rounded-[2.5rem] p-8 border ${currentTheme.border} shadow-2xl animate-in zoom-in-95 duration-300 ring-1 ring-white/10`}>
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-2xl font-black text-white">اختر المظهر</h2>
-              <button onClick={() => setIsSettingsOpen(false)} className="text-zinc-500 hover:text-white">
+              <button onClick={() => setIsSettingsOpen(false)} className="text-zinc-500 hover:text-white transition-colors active:scale-90">
                 <Plus className="w-6 h-6 rotate-45" />
               </button>
             </div>
 
-            <div className="grid gap-4 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
+            {/* Version Info & Check Update Button */}
+            <div className="mb-6 bg-white/5 p-4 rounded-2xl border border-white/5">
+              <div className="flex items-center justify-between mb-2">
+                <div>
+                  <p className="text-sm text-zinc-400">الإصدار الحالي</p>
+                  <p className="text-lg font-bold text-white">v{APP_VERSION}</p>
+                </div>
+
+                <button
+                  onClick={() => checkForUpdates(true)}
+                  disabled={isCheckingUpdate}
+                  className="bg-white/10 hover:bg-white/20 active:scale-95 transition-all text-white px-3 py-2 rounded-xl flex items-center gap-2 text-xs font-bold disabled:opacity-50 border border-white/5"
+                >
+                  <RefreshCw className={`w-3 h-3 ${isCheckingUpdate ? 'animate-spin' : ''}`} />
+                  {isCheckingUpdate ? 'Checking...' : 'Check for Updates'}
+                </button>
+              </div>
+
+              {/* Result Message */}
+              {lastCheckMessage && (
+                <div className="flex items-center gap-2 text-xs mt-2 pt-2 border-t border-white/5 animate-in fade-in">
+                  {lastCheckMessage.includes('متوفر') ? (
+                    <CheckCircle2 className="w-3 h-3 text-blue-400" />
+                  ) : lastCheckMessage.includes('latest') ? (
+                    <CheckCircle2 className="w-3 h-3 text-green-400" />
+                  ) : (
+                    <AlertTriangle className="w-3 h-3 text-yellow-400" />
+                  )}
+                  <span className="text-zinc-300">{lastCheckMessage}</span>
+                  {updateAvailable && (
+                    <a href={`https://github.com/${GITHUB_CONFIG.USERNAME}/${GITHUB_CONFIG.REPO}`} target="_blank" className="mr-auto text-blue-400 hover:underline font-bold">تنزيل</a>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="grid gap-4 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
               {Object.keys(THEMES).map((key) => {
                 const theme = THEMES[key];
                 const isActive = currentTheme.id === theme.id;
@@ -467,7 +636,7 @@ export default function App() {
                   <button
                     key={key}
                     onClick={() => changeTheme(key)}
-                    className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${isActive ? `border-${theme.accent.split('-')[1]}-500 ${theme.accentLight}` : 'border-white/5 bg-white/5'}`}
+                    className={`flex items-center justify-between p-4 rounded-2xl border transition-all duration-300 active:scale-95 ${isActive ? `border-${theme.accent.split('-')[1]}-500 ${theme.accentLight} bg-opacity-20` : 'border-white/5 bg-white/5 hover:bg-white/10'}`}
                   >
                     <div className="flex items-center gap-4">
                       <div className={`w-8 h-8 rounded-full ${theme.accentBg}`}></div>
@@ -478,23 +647,23 @@ export default function App() {
                 );
               })}
             </div>
-            <button onClick={() => setIsSettingsOpen(false)} className={`w-full mt-8 p-4 rounded-2xl bg-zinc-800 text-zinc-400 font-bold active:scale-95 transition-all`}>إغلاق</button>
+            <button onClick={() => setIsSettingsOpen(false)} className={`w-full mt-8 p-4 rounded-2xl bg-white/10 text-white hover:bg-white/20 font-bold active:scale-95 transition-all duration-300 border border-white/5`}>إغلاق</button>
           </div>
         </div>
       )}
 
       {/* Confirmation Modal */}
       {deleteConfirm.isOpen && (
-        <div className="fixed inset-0 bg-black/95 backdrop-blur-md z-[100] flex items-center justify-center p-6 animate-in fade-in duration-200">
-          <div className={`${currentTheme.surface} w-full max-w-xs rounded-[2.5rem] p-8 border border-red-500/20 shadow-2xl text-center`}>
-            <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-6 mx-auto">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] flex items-center justify-center p-6 animate-in fade-in duration-200">
+          <div className={`${currentTheme.surface} w-full max-w-xs rounded-[2.5rem] p-8 border border-red-500/20 shadow-2xl text-center animate-in zoom-in-95 duration-300 ring-1 ring-red-500/10`}>
+            <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-6 mx-auto animate-bounce">
               <AlertTriangle className="w-8 h-8 text-red-500" />
             </div>
             <h2 className="text-xl font-black mb-2 text-white">حذف نهائي؟</h2>
-            <p className="text-zinc-500 text-sm mb-8 leading-relaxed">سيتم حذف <span className="text-white font-bold">"{deleteConfirm.title}"</span> تماماً.</p>
+            <p className="text-zinc-400 text-sm mb-8 leading-relaxed">سيتم حذف <span className="text-white font-bold">"{deleteConfirm.title}"</span> تماماً.</p>
             <div className="flex flex-col gap-3">
-              <button onClick={executeDelete} className="w-full bg-red-600 text-white p-4 rounded-2xl font-black shadow-lg active:scale-95 transition-all">تأكيد الحذف</button>
-              <button onClick={() => setDeleteConfirm({ isOpen: false, type: null, id: null, title: '' })} className="w-full bg-zinc-800 text-zinc-400 p-4 rounded-2xl font-bold active:scale-95 transition-all">إلغاء</button>
+              <button onClick={executeDelete} className="w-full bg-red-600 hover:bg-red-500 text-white p-4 rounded-2xl font-black shadow-lg shadow-red-900/20 active:scale-95 transition-all duration-300">تأكيد الحذف</button>
+              <button onClick={() => setDeleteConfirm({ isOpen: false, type: null, id: null, title: '' })} className="w-full bg-white/10 hover:bg-white/20 text-white p-4 rounded-2xl font-bold active:scale-95 transition-all duration-300 border border-white/5">إلغاء</button>
             </div>
           </div>
         </div>
@@ -502,24 +671,24 @@ export default function App() {
 
       {/* Add Day Modal */}
       {isAddingDay && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-xl z-50 flex items-center justify-center p-6 animate-in fade-in duration-300">
-          <div className={`${currentTheme.surface} w-full max-w-sm rounded-[2.5rem] p-8 border ${currentTheme.border} shadow-2xl`}>
-            <div className={`w-16 h-16 ${currentTheme.accentBg} rounded-[1.5rem] flex items-center justify-center mb-6 mx-auto shadow-lg`}>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xl z-50 flex items-center justify-center p-6 animate-in fade-in duration-300">
+          <div className={`${currentTheme.surface} w-full max-w-sm rounded-[2.5rem] p-8 border ${currentTheme.border} shadow-2xl animate-in zoom-in-95 duration-300 ring-1 ring-white/10`}>
+            <div className={`w-16 h-16 ${currentTheme.accentBg} rounded-[1.5rem] flex items-center justify-center mb-6 mx-auto shadow-lg shadow-${currentTheme.accent.split('-')[1]}-500/20`}>
               <Calendar className="w-8 h-8 text-white" />
             </div>
-            <h2 className="text-2xl font-black text-center mb-6">تسمية اليوم</h2>
+            <h2 className="text-2xl font-black text-center mb-6 text-white">تسمية اليوم</h2>
             <input
               autoFocus
               type="text"
               placeholder="مثلاً: يوم الصدر"
-              className={`w-full ${currentTheme.bg} border ${currentTheme.border} rounded-2xl p-5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-${currentTheme.accent.split('-')[1]}-500 mb-6 text-center font-bold`}
+              className={`w-full bg-black/20 border ${currentTheme.border} rounded-2xl p-5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-${currentTheme.accent.split('-')[1]}-500 mb-6 text-center font-bold transition-all duration-300`}
               value={newDayTitle}
               onChange={(e) => setNewDayTitle(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleAddDay()}
             />
             <div className="flex gap-4">
-              <button onClick={handleAddDay} className={`flex-[2] ${currentTheme.accentBg} text-white p-5 rounded-2xl font-black shadow-lg active:scale-95 transition-all`}>تأكيد</button>
-              <button onClick={() => setIsAddingDay(false)} className="flex-1 bg-zinc-800 text-zinc-400 p-5 rounded-2xl font-bold active:scale-95 transition-all text-xs">إلغاء</button>
+              <button onClick={handleAddDay} className={`flex-[2] ${currentTheme.accentBg} hover:opacity-90 text-white p-5 rounded-2xl font-black shadow-lg active:scale-95 transition-all duration-300`}>تأكيد</button>
+              <button onClick={() => setIsAddingDay(false)} className="flex-1 bg-white/10 hover:bg-white/20 text-white p-5 rounded-2xl font-bold active:scale-95 transition-all duration-300 text-xs border border-white/5">إلغاء</button>
             </div>
           </div>
         </div>
@@ -527,37 +696,37 @@ export default function App() {
 
       {/* Manual Add Exercise Modal with Video Support */}
       {isAddingExercise && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-xl z-50 flex items-center justify-center p-6 animate-in zoom-in duration-300">
-          <div className={`${currentTheme.surface} w-full max-w-sm rounded-[2.5rem] border ${currentTheme.border} shadow-2xl flex flex-col max-h-[90vh] overflow-y-auto custom-scrollbar`}>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xl z-50 flex items-center justify-center p-6 animate-in zoom-in-95 duration-300">
+          <div className={`${currentTheme.surface} w-full max-w-sm rounded-[2.5rem] border ${currentTheme.border} shadow-2xl flex flex-col max-h-[90vh] overflow-y-auto custom-scrollbar ring-1 ring-white/10`}>
 
-            <div className="p-6 pb-2 text-center border-b border-white/5 sticky top-0 bg-inherit z-10">
+            <div className="p-6 pb-2 text-center border-b border-white/5 sticky top-0 bg-inherit z-10 backdrop-blur-xl rounded-t-[2.5rem]">
               <h2 className="text-xl font-black text-white">إضافة تمرين جديد</h2>
-              <p className="text-zinc-500 text-xs mt-1">أضف صورة أو فيديو توضيحي</p>
+              <p className="text-zinc-400 text-xs mt-1">أضف صورة أو فيديو توضيحي</p>
             </div>
 
             <div className="p-6">
               <div className="mb-6">
-                <label className={`flex flex-col items-center justify-center w-full aspect-video border-2 ${currentTheme.border} border-dashed rounded-[1.5rem] cursor-pointer hover:bg-white/5 transition-all relative overflow-hidden bg-zinc-900/50 group`}>
+                <label className={`flex flex-col items-center justify-center w-full aspect-video border-2 ${currentTheme.border} border-dashed rounded-[1.5rem] cursor-pointer hover:bg-white/5 transition-all duration-300 relative overflow-hidden bg-black/20 group active:scale-[0.98]`}>
                   {previewUrl ? (
                     <>
                       {previewType === 'video' ? (
-                        <video src={previewUrl} className="w-full h-full object-cover opacity-80" autoPlay muted loop playsInline />
+                        <video src={previewUrl} className="w-full h-full object-cover opacity-80 transition-opacity duration-300 group-hover:opacity-60" autoPlay muted loop playsInline />
                       ) : (
-                        <img src={previewUrl} className="w-full h-full object-cover opacity-80" alt="Preview" />
+                        <img src={previewUrl} className="w-full h-full object-cover opacity-80 transition-opacity duration-300 group-hover:opacity-60" alt="Preview" />
                       )}
 
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span className="text-xs font-bold text-white flex items-center gap-2"><Edit3 className="w-4 h-4" /> تغيير الملف</span>
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-sm">
+                        <span className="text-xs font-bold text-white flex items-center gap-2 px-4 py-2 bg-white/10 rounded-xl border border-white/10"><Edit3 className="w-4 h-4" /> تغيير الملف</span>
                       </div>
                       {previewType === 'video' && (
-                        <div className="absolute top-2 right-2 bg-black/50 p-1.5 rounded-lg backdrop-blur-md">
+                        <div className="absolute top-2 right-2 bg-black/50 p-1.5 rounded-lg backdrop-blur-md border border-white/10">
                           <Film className="w-4 h-4 text-white" />
                         </div>
                       )}
                     </>
                   ) : (
-                    <div className="text-center p-4">
-                      <div className="w-14 h-14 bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-3 shadow-inner">
+                    <div className="text-center p-4 transform transition-transform duration-300 group-hover:scale-110">
+                      <div className="w-14 h-14 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-3 shadow-inner border border-white/5">
                         <Upload className={`w-6 h-6 ${currentTheme.accent}`} />
                       </div>
                       <p className="text-sm text-zinc-300 font-bold mb-1">صورة أو فيديو</p>
@@ -578,7 +747,7 @@ export default function App() {
                 <input
                   type="text"
                   placeholder="اسم التمرين (مثلاً: بنش برس)"
-                  className={`w-full ${currentTheme.bg} border ${currentTheme.border} rounded-2xl p-5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-${currentTheme.accent.split('-')[1]}-500 font-bold text-center`}
+                  className={`w-full bg-black/20 border ${currentTheme.border} rounded-2xl p-5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-${currentTheme.accent.split('-')[1]}-500 font-bold text-center transition-all duration-300`}
                   value={newExerciseName}
                   onChange={(e) => setNewExerciseName(e.target.value)}
                 />
@@ -586,7 +755,7 @@ export default function App() {
                 <button
                   onClick={handleAddExercise}
                   disabled={!newExerciseName.trim() || isSaving}
-                  className={`w-full ${currentTheme.accentBg} text-white p-5 rounded-2xl font-black shadow-lg active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2`}
+                  className={`w-full ${currentTheme.accentBg} hover:opacity-90 text-white p-5 rounded-2xl font-black shadow-lg active:scale-95 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2`}
                 >
                   {isSaving ? (
                     <>
@@ -598,8 +767,8 @@ export default function App() {
               </div>
             </div>
 
-            <div className="p-4 border-t border-white/5 bg-zinc-900/50 rounded-b-[2.5rem]">
-              <button onClick={() => setIsAddingExercise(false)} className="w-full py-3 bg-zinc-800 text-zinc-400 rounded-xl font-bold active:scale-95 transition-all text-xs">إلغاء</button>
+            <div className="p-4 border-t border-white/5 bg-black/20 rounded-b-[2.5rem]">
+              <button onClick={() => setIsAddingExercise(false)} className="w-full py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold active:scale-95 transition-all duration-300 text-xs border border-white/5">إلغاء</button>
             </div>
           </div>
         </div>
